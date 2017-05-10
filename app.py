@@ -39,7 +39,7 @@ if channel_access_token is None:
 
 line_bot_api = LineBotApi(channel_access_token)
 parser = WebhookParser(channel_secret)
-
+print('Florensia Unggul')
 
 def application(environ, start_response):
     # check request path
