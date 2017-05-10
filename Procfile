@@ -1,1 +1,1 @@
-web: gunicorn app:app --bind="0.0.0.0:8000" --debug
+web: gunicorn -b 0.0.0.0:8000 pythonrepo.wsgi:application
