@@ -28,7 +28,7 @@ from linebot.models import (
 from linebot.utils import PY3
 
 # get channel_secret and channel_access_token from your environment variable
-channel_secret = os.getenv('LINE_CHANNEL_SECRET', 'Ua46870ee4bc735d4f7ba49afcbc4f0da')
+channel_secret = os.getenv('LINE_CHANNEL_SECRET', 'e28f3b71efa37e176811715c749b74ac')
 channel_access_token = os.getenv('LINE_CHANNEL_ACCESS_TOKEN','T5jiQgxmfY2VRiUC7DzhYwjwLQr5gD2FKddYkXYYmduIF6zxKfSk8rtOp7dzsZv4JKLoPSSzNzGN820Xi2nOcrqe5JPOqFw6ctWUtwnYWxRc5kBmyOXfeICPZJE50K2iGh8OYguGQa+4DvOFzYEtcQdB04t89/1O/w1cDnyilFU=')
 if channel_secret is None:
     print('Specify LINE_CHANNEL_SECRET as environment variable.')
@@ -43,37 +43,51 @@ parser = WebhookParser(channel_secret)
 
 def application(environ, start_response):
     # check request path
+    print(environ)
+    print(environ['PATH_INFO'])
+    print(environ['REQUEST_METHOD'])
     if environ['PATH_INFO'] != '/callback':
         start_response('404 Not Found', [])
+        print('start_response 404:' + '404 Not Found');
         return create_body('Not Found')
 
     # check request method
     if environ['REQUEST_METHOD'] != 'POST':
         start_response('405 Method Not Allowed', [])
+        print('start_response 405:' + '405 Method Not Allowed');
         return create_body('Method Not Allowed')
 
     # get X-Line-Signature header value
     signature = environ['HTTP_X_LINE_SIGNATURE']
+    print('signature:' + signature)
 
     # get request body as text
     wsgi_input = environ['wsgi.input']
     content_length = int(environ['CONTENT_LENGTH'])
     body = wsgi_input.read(content_length).decode('utf-8')
-
+    #print('wsgi_input:'+ wsgi_input);
+    #print('content_length' + content_length);
+    print('body' + body);
     # parse webhook body
     try:
         events = parser.parse(body, signature)
+        #print('events' + events);
     except InvalidSignatureError:
         start_response('400 Bad Request', [])
+        print('start_response 400:' + '400 Bad Request');
         return create_body('Bad Request')
 
     # if event is MessageEvent and message is TextMessage, then echo text
     for event in events:
         if not isinstance(event, MessageEvent):
+            print('event MessageEvent' + MessageEvent)
             continue
         if not isinstance(event.message, TextMessage):
+            print('event TextMessage' + TextMessage)
             continue
 
+        print('event.reply_token:'+event.reply_token)
+        print('event.message.text:'+event.message.text)
         line_bot_api.reply_message(
             event.reply_token,
             TextSendMessage(text=event.message.text)
@@ -85,8 +99,10 @@ def application(environ, start_response):
 
 def create_body(text):
     if PY3:
+        print('PY3' + text)
         return [bytes(text, 'utf-8')]
     else:
+        print('else' + text)
         return text
 
 
